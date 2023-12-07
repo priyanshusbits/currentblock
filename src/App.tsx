@@ -1,4 +1,3 @@
-import "./App.css";
 import React, { useState, useCallback } from "react";
 
 import {
@@ -28,7 +27,9 @@ const datatokenType = DatatokenType.Profileless;
 
 const App = () => {
   const postModel = modelParser.getModelByName("blog");
-  const [currentFileId, setCurrentFileId] = useState<string>("kjzl6kcym7w8y5b8s03wx3wzec4za7wne6p9u603gdt6f7f2qhsctmlobe6lcy8");
+  const [currentFileId, setCurrentFileId] = useState<string>(
+    "kjzl6kcym7w8y5b8s03wx3wzec4za7wne6p9u603gdt6f7f2qhsctmlobe6lcy8"
+  );
 
   /**
    * @summary import from @dataverse/hooks
@@ -242,45 +243,118 @@ const App = () => {
 
   return (
     <>
-      <button onClick={connect}>connect</button>
+      <div className="navbar bg-base-100">
+        <div className="navbar-start">
+          <div className="dropdown">
+            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h8m-8 6h16"
+                />
+              </svg>
+            </div>
+            <ul
+              tabIndex={0}
+              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li>
+                <a>Item 1</a>
+              </li>
+              <li>
+                <a>Parent</a>
+                <ul className="p-2">
+                  <li>
+                    <a>Submenu 1</a>
+                  </li>
+                  <li>
+                    <a>Submenu 2</a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a>Item 3</a>
+              </li>
+            </ul>
+          </div>
+          <a className="btn btn-ghost text-xl">CurrentBLOCK</a>
+        </div>
+        <div className="navbar-center hidden lg:flex">
+          <ul className="menu menu-horizontal px-1">
+            <li>
+              <a>Item 1</a>
+            </li>
+            <li>
+              <details>
+                <summary>Parent</summary>
+                <ul className="p-2">
+                  <li>
+                    <a>Submenu 1</a>
+                  </li>
+                  <li>
+                    <a>Submenu 2</a>
+                  </li>
+                </ul>
+              </details>
+            </li>
+            <li>
+              <a>Item 3</a>
+            </li>
+          </ul>
+        </div>
+        <div className="navbar-end">
+          
+          <button className="btn" onClick={connect}>{pkh?"connected":"connect"}</button>
+        </div>
+      </div>
+      
+    {/* <button onClick={connect}>connect</button> */}
       <div className="black-text">{pkh}</div>
       <hr />
-      <button onClick={createPost}>createPost</button>
+      <button className="btn"  onClick={createPost}>createPost</button>
       {createdIndexFile && (
         <div className="json-view">
           <ReactJson src={createdIndexFile} collapsed={true} />
         </div>
       )}
-      <button onClick={createEncryptedPost}>createEncryptedPost</button>
+      {/* <button className="btn"  onClick={createEncryptedPost}>createEncryptedPost</button>
       {createdEncryptedFile && (
         <div className="json-view">
           <ReactJson src={createdEncryptedFile} collapsed={true} />
         </div>
-      )}
-      <button onClick={loadPosts}>loadPosts</button>
+      )} */}
+      <button className="btn"  onClick={loadPosts}>loadPosts</button>
       {posts && (
         <div className="json-view">
           <ReactJson src={posts} collapsed={true} />
         </div>
       )}
-      <button onClick={updatePost}>updatePost</button>
+      <button className="btn"  onClick={updatePost}>updatePost</button>
       {updatedPost && (
         <div className="json-view">
           <ReactJson src={updatedPost} collapsed={true} />
         </div>
       )}
-      <button onClick={monetizePost}>monetizePost</button>
+      <button className="btn"  onClick={monetizePost}>monetizePost</button>
       {monetizedPost && (
         <div className="json-view">
           <ReactJson src={monetizedPost} collapsed={true} />
         </div>
       )}
-      <button onClick={getDatatokenInfoByFileId}>datatokenInfo</button>
+      {/* <button className="btn"  onClick={getDatatokenInfoByFileId}>datatokenInfo</button>
       {datatokenInfo && (
         <div className="json-view">
           <ReactJson src={datatokenInfo} collapsed={true} />
         </div>
-      )}
+      )} */}
       <br />
       <div className="red">
         You need to switch another account to collect the post and unlock the
