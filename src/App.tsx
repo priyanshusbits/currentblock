@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 
 import {
   ChainId,
@@ -20,6 +20,7 @@ import { ModelParser, Output } from "@dataverse/model-parser";
 import ReactJson from "react-json-view";
 
 import app from "../output/app.json";
+import { strict } from "assert";
 
 const postVersion = "0.0.1";
 const modelParser = new ModelParser(app as Output);
@@ -30,6 +31,11 @@ const App = () => {
   const [currentFileId, setCurrentFileId] = useState<string>(
     "kjzl6kcym7w8y5b8s03wx3wzec4za7wne6p9u603gdt6f7f2qhsctmlobe6lcy8"
   );
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [fetchedData, setFetchedData] = useState<Array<[string, string]>>([
+    ["title", "content"],
+  ]);
 
   /**
    * @summary import from @dataverse/hooks
@@ -65,6 +71,22 @@ const App = () => {
     },
   });
 
+  const { loadFeedsByAddres2s } = useFeedsByAddress({
+    model: postModel,
+    onError: (error) => {
+      console.error("[loadPosts]load files failed,", error);
+    },
+    onSuccess: (result) => {
+      console.log("[loadPosts]load files success, result:", result);
+      console.log("hh");
+      var keys: any = [];
+      var fetchedPosts: any = Object.keys(JSON.parse(JSON.stringify(result)));
+      fetchedPosts.map((item: any) => keys.push(item));
+
+      console.log(keys);
+    },
+  });
+
   const { loadFeedsByAddress } = useFeedsByAddress({
     model: postModel,
     onError: (error) => {
@@ -72,6 +94,20 @@ const App = () => {
     },
     onSuccess: (result) => {
       console.log("[loadPosts]load files success, result:", result);
+      console.log("hh");
+      var data = result;
+      setFetchedData([]);
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          const record = data[key];
+          const content: string = record.fileContent.content.content;
+          const title: string = record.fileContent.content.title;
+
+          setFetchedData((prevData) => [...prevData, [content, title]]);
+        }
+      }
+
+      console.log(fetchedData);
     },
   });
 
@@ -115,25 +151,35 @@ const App = () => {
     connectApp();
   }, [connectApp]);
 
-  const createPost = useCallback(async () => {
-    if (!postModel) {
-      console.error("postModel undefined");
-      return;
-    }
+  const createPost = useCallback(
+    async (title: any, content: any) => {
+      if (!postModel) {
+        console.error("postModel undefined");
+        return;
+      }
 
-    createIndexFile({
-      modelId: postModel.streams[postModel.streams.length - 1].modelId,
-      fileName: "create file test",
-      fileContent: {
-        modelVersion: postVersion,
-        title: "dataverse",
-        content: "a dataverse project",
+      createIndexFile({
+        modelId: postModel.streams[postModel.streams.length - 1].modelId,
+        fileName: "Post" + title, // Using the title for fileName
+        fileContent: {
+          modelVersion: postVersion,
+          title: title, // User-provided title
+          content: content, // User-provided content
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      });
+    },
+    [postModel, createIndexFile]
+  );
 
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    });
-  }, [postModel, createIndexFile]);
+  const handleSubmit = useCallback(
+    async (event: any) => {
+      event.preventDefault();
+      createPost(title, content);
+    },
+    [title, content, createPost]
+  );
 
   const createEncryptedPost = useCallback(async () => {
     if (!postModel) {
@@ -174,6 +220,7 @@ const App = () => {
 
     await loadFeedsByAddress(pkh);
   }, [postModel, pkh, loadFeedsByAddress]);
+  // [postModel, pkh, loadFeedsByAddress]
 
   const updatePost = useCallback(async () => {
     if (!currentFileId) {
@@ -240,6 +287,15 @@ const App = () => {
     }
     unlockFile(currentFileId);
   }, [unlockFile]);
+
+  // reader implementation
+  useEffect(() => {
+    loadPosts();
+  }, [postModel, pkh, createdIndexFile]);
+
+  console.log(fetchedData);
+
+  fetchedData.map((item) => console.log(item[1]));
 
   return (
     <>
@@ -311,39 +367,117 @@ const App = () => {
           </ul>
         </div>
         <div className="navbar-end">
-          
-          <button className="btn" onClick={connect}>{pkh?"connected":"connect"}</button>
+          <button className="btn" onClick={connect}>
+            {pkh ? "connected" : "connect"}
+          </button>
         </div>
       </div>
-      
-    {/* <button onClick={connect}>connect</button> */}
-      <div className="black-text">{pkh}</div>
-      <hr />
-      <button className="btn"  onClick={createPost}>createPost</button>
-      {createdIndexFile && (
+
+      {/* <button onClick={connect}>connect</button> */}
+      {/* <div className="black-text">{pkh}</div>
+      <hr /> */}
+      <div className="max-w-4xl mx-auto my-10">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+        >
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="title"
+            >
+              Title
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="title"
+              type="text"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="mb-6">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="content"
+            >
+              Content
+            </label>
+            <textarea
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="content"
+              placeholder="Content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows="4"
+            ></textarea>
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="submit"
+            >
+              Create Post
+            </button>
+          </div>
+        </form>
+      </div>
+      {/* {createdIndexFile && (
         <div className="json-view">
           <ReactJson src={createdIndexFile} collapsed={true} />
         </div>
-      )}
+      )} */}
       {/* <button className="btn"  onClick={createEncryptedPost}>createEncryptedPost</button>
       {createdEncryptedFile && (
         <div className="json-view">
           <ReactJson src={createdEncryptedFile} collapsed={true} />
         </div>
       )} */}
-      <button className="btn"  onClick={loadPosts}>loadPosts</button>
-      {posts && (
+      {/* <button className="btn" onClick={loadPosts}>
+        loadPosts
+      </button> */}
+      {/* {posts && (
         <div className="json-view">
           <ReactJson src={posts} collapsed={true} />
         </div>
-      )}
-      <button className="btn"  onClick={updatePost}>updatePost</button>
+      )} */}
+      {/* {posts && (
+        <div className="json-view">
+          <ReactJson src={posts} collapsed={true} />
+        </div>
+      )} */}
+
+      {fetchedData &&
+        fetchedData.map((item) => (
+          <div className="card w-96 bg-base-100 shadow-xl">
+            <figure>
+              <img
+                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+                alt="Shoes"
+              />
+            </figure>
+            <div className="card-body">
+              <h2 className="card-title">{item[1]}</h2>
+              <p>{item[0]}</p>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary">Buy Now</button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+      <button className="btn" onClick={updatePost}>
+        updatePost
+      </button>
       {updatedPost && (
         <div className="json-view">
           <ReactJson src={updatedPost} collapsed={true} />
         </div>
       )}
-      <button className="btn"  onClick={monetizePost}>monetizePost</button>
+      <button className="btn" onClick={monetizePost}>
+        monetizePost
+      </button>
       {monetizedPost && (
         <div className="json-view">
           <ReactJson src={monetizedPost} collapsed={true} />
