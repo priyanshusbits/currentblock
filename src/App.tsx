@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-
+import Editor from "./Editor";
 import {
   ChainId,
   Currency,
@@ -27,6 +27,7 @@ const modelParser = new ModelParser(app as Output);
 const datatokenType = DatatokenType.Profileless;
 
 const App = () => {
+  const [editorData, setEditorData] = useState({});
   const postModel = modelParser.getModelByName("blog");
   const [currentFileId, setCurrentFileId] = useState<string>(
     "kjzl6kcym7w8y5b8s03wx3wzec4za7wne6p9u603gdt6f7f2qhsctmlobe6lcy8"
@@ -34,12 +35,51 @@ const App = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [fetchedData, setFetchedData] = useState<Array<[string, string]>>([
-    ["title", "content"],
+    [
+      "title",
+      `"{"time":1703101314679,"blocks":[{"id":"lANeof8kMa","type":"code","data":{"code":"print(\"\")"
+  }
+  },
+  {
+  "id": "dC1jHfKG7f",
+  "type": "header",
+  "data": {
+  "text": "gdfgdfgdfg",
+  "level": 6
+  }
+  },
+  {
+  "id": "sPbQxB5fvl",
+  "type": "list",
+  "data": {
+  "style": "unordered",
+  "items": [
+    "fdgdfgdfgdfgf"
+  ]
+  }
+  },
+  {
+  "id": "T77RHPUmF_",
+  "type": "list",
+  "data": {
+  "style": "unordered",
+  "items": [
+    "dfggdfgdfgdfg"
+  ]
+  }
+  }
+  ],
+  "version": "2.28.2"
+  }"`,
+    ],
   ]);
 
   /**
    * @summary import from @dataverse/hooks
    */
+  const handleEditorChange = (data) => {
+    setEditorData(data);
+  };
 
   const { pkh, filesMap: posts } = useStore();
 
@@ -70,7 +110,7 @@ const App = () => {
       setCurrentFileId(result.fileContent.file.fileId);
     },
   });
-
+  console.log(fetchedData);
   const { loadFeedsByAddres2s } = useFeedsByAddress({
     model: postModel,
     onError: (error) => {
@@ -164,7 +204,7 @@ const App = () => {
         fileContent: {
           modelVersion: postVersion,
           title: title, // User-provided title
-          content: content, // User-provided content
+          content: JSON.stringify(editorData), // User-provided content
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
@@ -174,12 +214,29 @@ const App = () => {
   );
 
   const handleSubmit = useCallback(
-    async (event: any) => {
+    async (event) => {
       event.preventDefault();
-      createPost(title, content);
+      console.log(String(editorData));
+      createPost(title, editorData);
     },
-    [title, content, createPost]
+    [title, createPost, editorData]
   );
+
+  const renderEditorData = (editorData) => {
+    if (!editorData || !editorData.blocks) {
+      return null;
+    }
+
+    return editorData.blocks.map((block, index) => {
+      switch (block.type) {
+        case "paragraph":
+          return <p key={index}>{block.data.text}</p>;
+        // Add cases for other types of blocks here
+        default:
+          return null;
+      }
+    });
+  };
 
   const createEncryptedPost = useCallback(async () => {
     if (!postModel) {
@@ -293,9 +350,18 @@ const App = () => {
     loadPosts();
   }, [postModel, pkh, createdIndexFile]);
 
-  console.log(fetchedData);
-
-  fetchedData.map((item) => console.log(item[1]));
+  const getTextFromEditorData = (editorDataString) => {
+    try {
+      const editorData = JSON.parse(editorDataString);
+      if (!editorData || !editorData.blocks) {
+        return "";
+      }
+      return editorData.blocks.map((block) => block.data.text).join(" ");
+    } catch (e) {
+      // If JSON parsing fails, return the original string
+      return editorDataString;
+    }
+  };
 
   return (
     <>
@@ -404,14 +470,7 @@ const App = () => {
             >
               Content
             </label>
-            <textarea
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="content"
-              placeholder="Content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows="4"
-            ></textarea>
+            <Editor onChange={handleEditorChange} initialData={editorData} />
           </div>
           <div className="flex items-center justify-between">
             <button
@@ -459,7 +518,7 @@ const App = () => {
             </figure>
             <div className="card-body">
               <h2 className="card-title">{item[1]}</h2>
-              <p>{item[0]}</p>
+              <p>{getTextFromEditorData(item[0])}</p>
               <div className="card-actions justify-end">
                 <button className="btn btn-primary">Buy Now</button>
               </div>
