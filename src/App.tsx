@@ -36,7 +36,7 @@ const App = () => {
   const [content, setContent] = useState("");
   const [fetchedData, setFetchedData] = useState<Array<[string, string]>>([
     [
-      "title",
+      
       `"{"time":1703101314679,"blocks":[{"id":"lANeof8kMa","type":"code","data":{"code":"print(\"\")"
   }
   },
@@ -70,7 +70,7 @@ const App = () => {
   }
   ],
   "version": "2.28.2"
-  }"`,
+  }"`,"title",
     ],
   ]);
 
