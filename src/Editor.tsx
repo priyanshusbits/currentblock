@@ -7,7 +7,7 @@ import List from "@editorjs/list";
 import Embed from "@editorjs/embed";
 import Quote from "@editorjs/quote";
 import CodeTool from "@editorjs/code";
-const Editor = ({ onChange, initialData }) => {
+const Editor = ({ onChange, initialData, reload }) => {
   const editorRef = useRef(null);
   let editorInstance = null;
 
@@ -44,13 +44,14 @@ const Editor = ({ onChange, initialData }) => {
         onChange(data);
       },
     });
-
+  
     return () => {
       if (editorInstance && typeof editorInstance.destroy === "function") {
         editorInstance.destroy();
       }
     };
-  }, [onChange, initialData]);
+    
+  }, [reload]);
 
   return <div ref={editorRef}></div>;
 };

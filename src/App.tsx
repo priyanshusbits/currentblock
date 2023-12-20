@@ -218,6 +218,8 @@ const App = () => {
       event.preventDefault();
       console.log(String(editorData));
       createPost(title, editorData);
+      setTitle(""); // Clear title
+      setEditorData({}); // Clear editor content
     },
     [title, createPost, editorData]
   );
@@ -470,7 +472,7 @@ const App = () => {
             >
               Content
             </label>
-            <Editor onChange={handleEditorChange} initialData={editorData} />
+            <Editor reload={createdIndexFile} onChange={handleEditorChange} setEditorData={setEditorData} initialData={editorData} />
           </div>
           <div className="flex items-center justify-between">
             <button
@@ -482,30 +484,7 @@ const App = () => {
           </div>
         </form>
       </div>
-      {/* {createdIndexFile && (
-        <div className="json-view">
-          <ReactJson src={createdIndexFile} collapsed={true} />
-        </div>
-      )} */}
-      {/* <button className="btn"  onClick={createEncryptedPost}>createEncryptedPost</button>
-      {createdEncryptedFile && (
-        <div className="json-view">
-          <ReactJson src={createdEncryptedFile} collapsed={true} />
-        </div>
-      )} */}
-      {/* <button className="btn" onClick={loadPosts}>
-        loadPosts
-      </button> */}
-      {/* {posts && (
-        <div className="json-view">
-          <ReactJson src={posts} collapsed={true} />
-        </div>
-      )} */}
-      {/* {posts && (
-        <div className="json-view">
-          <ReactJson src={posts} collapsed={true} />
-        </div>
-      )} */}
+ 
 
       {fetchedData &&
         fetchedData.map((item) => (
@@ -526,46 +505,12 @@ const App = () => {
           </div>
         ))}
 
-      <button className="btn" onClick={updatePost}>
-        updatePost
-      </button>
-      {updatedPost && (
-        <div className="json-view">
-          <ReactJson src={updatedPost} collapsed={true} />
-        </div>
-      )}
-      <button className="btn" onClick={monetizePost}>
-        monetizePost
-      </button>
-      {monetizedPost && (
-        <div className="json-view">
-          <ReactJson src={monetizedPost} collapsed={true} />
-        </div>
-      )}
-      {/* <button className="btn"  onClick={getDatatokenInfoByFileId}>datatokenInfo</button>
-      {datatokenInfo && (
-        <div className="json-view">
-          <ReactJson src={datatokenInfo} collapsed={true} />
-        </div>
-      )} */}
-      <br />
-      <div className="red">
-        You need to switch another account to collect the post and unlock the
-        post.
-      </div>
-      <button onClick={collectPost}>collectPost</button>
-      {collectedPost && (
-        <div className="json-view">
-          <ReactJson src={collectedPost} collapsed={true} />
-        </div>
-      )}
-      <button onClick={unlockPost}>unlockPost</button>
-      {unlockedPost && (
-        <div className="json-view">
-          <ReactJson src={unlockedPost} collapsed={true} />
-        </div>
-      )}
-      <br />
+      
+   
+      
+
+     
+
     </>
   );
 };
