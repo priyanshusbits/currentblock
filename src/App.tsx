@@ -27,6 +27,7 @@ const modelParser = new ModelParser(app as Output);
 const datatokenType = DatatokenType.Profileless;
 
 const App = () => {
+  const [showForm, setShowForm] = useState(false);
   const [editorData, setEditorData] = useState({});
   const postModel = modelParser.getModelByName("blog");
   const [currentFileId, setCurrentFileId] = useState<string>(
@@ -36,7 +37,6 @@ const App = () => {
   const [content, setContent] = useState("");
   const [fetchedData, setFetchedData] = useState<Array<[string, string]>>([
     [
-      
       `"{"time":1703101314679,"blocks":[{"id":"lANeof8kMa","type":"code","data":{"code":"print(\"\")"
   }
   },
@@ -70,7 +70,8 @@ const App = () => {
   }
   ],
   "version": "2.28.2"
-  }"`,"title",
+  }"`,
+      "title",
     ],
   ]);
 
@@ -79,6 +80,9 @@ const App = () => {
    */
   const handleEditorChange = (data) => {
     setEditorData(data);
+  };
+  const toggleForm = () => {
+    setShowForm(!showForm);
   };
 
   const { pkh, filesMap: posts } = useStore();
@@ -366,8 +370,8 @@ const App = () => {
   };
 
   return (
-    <>
-      <div className="navbar bg-base-100">
+    <div className="bg-white">
+      <div className="navbar bg-white">
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -388,7 +392,7 @@ const App = () => {
             </div>
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52"
             >
               <li>
                 <a>Item 1</a>
@@ -444,8 +448,17 @@ const App = () => {
       {/* <button onClick={connect}>connect</button> */}
       {/* <div className="black-text">{pkh}</div>
       <hr /> */}
-      <div className="max-w-4xl mx-auto my-10">
-        <form
+
+<div className="bg-white max-w-4xl mx-auto my-10">
+      <button
+        onClick={toggleForm}
+        className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+      >
+        {showForm ? 'Hide Form' : 'Create New Post'}
+      </button>
+
+      {showForm && (
+          <form
           onSubmit={handleSubmit}
           className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
         >
@@ -457,7 +470,7 @@ const App = () => {
               Title
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="bg-white shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="title"
               type="text"
               placeholder="Title"
@@ -472,7 +485,12 @@ const App = () => {
             >
               Content
             </label>
-            <Editor reload={createdIndexFile} onChange={handleEditorChange} setEditorData={setEditorData} initialData={editorData} />
+            <Editor
+              reload={createdIndexFile}
+              onChange={handleEditorChange}
+              setEditorData={setEditorData}
+              initialData={editorData}
+            />
           </div>
           <div className="flex items-center justify-between">
             <button
@@ -483,35 +501,34 @@ const App = () => {
             </button>
           </div>
         </form>
-      </div>
+      )}
+    </div>
+
  
 
-      {fetchedData &&
-        fetchedData.map((item) => (
-          <div className="card w-96 bg-base-100 shadow-xl">
-            <figure>
-              <img
-                src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
-                alt="Shoes"
-              />
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title">{item[1]}</h2>
-              <p>{getTextFromEditorData(item[0])}</p>
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary">Buy Now</button>
+      <div className="flex flex-wrap -mx-2 overflow-hidden">
+        {fetchedData &&
+          [...fetchedData].reverse().map((item, index) => (
+            <div key={index} className="my-2 px-2 w-1/3 overflow-hidden">
+              <div className="card w-full bg-emerald-100 shadow-xl">
+                <figure>
+                  <img
+                    src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+                    alt="Shoes"
+                  />
+                </figure>
+                <div className="card-body">
+                  <h2 className="card-title">{item[1]}</h2>
+                  <p>{getTextFromEditorData(item[0])}</p>
+                  <div className="card-actions justify-end">
+                    <button className="btn btn-primary">Buy Now</button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-
-      
-   
-      
-
-     
-
-    </>
+          ))}
+      </div>
+    </div>
   );
 };
 
