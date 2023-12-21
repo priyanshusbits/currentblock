@@ -7,7 +7,7 @@ import List from "@editorjs/list";
 import Embed from "@editorjs/embed";
 import Quote from "@editorjs/quote";
 import CodeTool from "@editorjs/code";
-const Editor = ({ onChange, initialData, reload }) => {
+const Editor = ({ onChange, initialData, reload,setEditorData  }) => {
   const editorRef = useRef(null);
   let editorInstance = null;
 
@@ -24,10 +24,7 @@ const Editor = ({ onChange, initialData, reload }) => {
         // Example: Header, List, etc.
         header: Header,
         image: SimpleImage,
-        checklist: {
-          class: Checklist,
-          inlineToolbar: true,
-        },
+        
         list: {
           class: List,
           inlineToolbar: true,

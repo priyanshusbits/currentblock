@@ -47,6 +47,9 @@ dependencies:
   '@editorjs/simple-image':
     specifier: ^1.6.0
     version: 1.6.0
+  editorjs-html:
+    specifier: ^3.4.3
+    version: 3.4.3
   ethers:
     specifier: 5.6.9
     version: 5.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.3)
@@ -4544,6 +4547,10 @@ packages:
       inherits: 2.0.4
       readable-stream: 3.6.2
       stream-shift: 1.0.1
+    dev: false
+
+  /editorjs-html@3.4.3:
+    resolution: {integrity: sha512-HMqQ3BCE98uhSpJsbfH0c3CoMctUMCHlap2Eq/7/VjaHas+g3IJqyf+ERtMByoQCzvcW22ISYaZEeE7rGkd8Xg==}
     dev: false
 
   /eip1193-provider@1.0.1:

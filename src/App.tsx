@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import Editor from "./Editor";
+import edjsHTML from "editorjs-html";
 import {
   ChainId,
   Currency,
@@ -27,6 +28,8 @@ const modelParser = new ModelParser(app as Output);
 const datatokenType = DatatokenType.Profileless;
 
 const App = () => {
+  const edjsParser = edjsHTML();
+  const [parsedData, setParsedData] = useState();
   const [showForm, setShowForm] = useState(false);
   const [editorData, setEditorData] = useState({});
   const postModel = modelParser.getModelByName("blog");
@@ -115,6 +118,7 @@ const App = () => {
     },
   });
   console.log(fetchedData);
+
   const { loadFeedsByAddres2s } = useFeedsByAddress({
     model: postModel,
     onError: (error) => {
@@ -195,12 +199,50 @@ const App = () => {
     connectApp();
   }, [connectApp]);
 
+  const openCardInNewWindow = (rawEditorData, title) => {
+    console.log(rawEditorData)
+    try {
+      // Ensure rawEditorData is not undefined and is a valid JSON string
+      if (!rawEditorData) {
+        console.error("Editor data is undefined or null");
+        return;
+      }
+
+      const parsedData = JSON.parse(rawEditorData);
+
+      // Parsing the raw editor data to HTML
+      const htmlContent = edjsParser.parse(parsedData);
+
+      // Opening a new window and writing the HTML content
+      const newWindow = window.open("", "_blank");
+      newWindow.document.write(`
+        <html>
+          <head>
+            <title>${title}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+            </style>
+          </head>
+          <body>
+            <h1>${title}</h1>
+            ${htmlContent}
+          </body>
+        </html>
+      `);
+    } catch (e) {
+      console.error("Error parsing editor data to HTML:", e);
+    }
+  };
+
   const createPost = useCallback(
     async (title: any, content: any) => {
       if (!postModel) {
         console.error("postModel undefined");
         return;
       }
+      console.log("llll");
+      console.log(JSON.stringify(editorData));
+      console.log("llll");
 
       createIndexFile({
         modelId: postModel.streams[postModel.streams.length - 1].modelId,
@@ -359,11 +401,16 @@ const App = () => {
   const getTextFromEditorData = (editorDataString) => {
     try {
       const editorData = JSON.parse(editorDataString);
+
+      // Log the parsed JSON for debugging
+      console.log("Parsed Editor Data:", edjsParser.parse(editorData));
+
       if (!editorData || !editorData.blocks) {
         return "";
       }
       return editorData.blocks.map((block) => block.data.text).join(" ");
     } catch (e) {
+      console.error("Failed to parse JSON string:", e);
       // If JSON parsing fails, return the original string
       return editorDataString;
     }
@@ -372,142 +419,139 @@ const App = () => {
   return (
     <div className="bg-white">
       <div className="navbar bg-white">
-        <div className="navbar-start">
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        <div className="navbar bg-white">
+          <div className="navbar-start">
+            <div className="dropdown">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost lg:hidden"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
-                />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h8m-8 6h16"
+                  />
+                </svg>
+              </div>
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52"
+              >
+                <li>
+                  <a>Item 1</a>
+                </li>
+                <li>
+                  <a>Parent</a>
+                  <ul className="p-2">
+                    <li>
+                      <a>Submenu 1</a>
+                    </li>
+                    <li>
+                      <a>Submenu 2</a>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  <a>Item 3</a>
+                </li>
+              </ul>
             </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52"
-            >
+            <a className="btn btn-ghost text-xl">CurrentBLOCK</a>
+          </div>
+          <div className="navbar-center hidden lg:flex">
+            <ul className="menu menu-horizontal px-1">
               <li>
                 <a>Item 1</a>
               </li>
               <li>
-                <a>Parent</a>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
+                <details>
+                  <summary>Parent</summary>
+                  <ul className="p-2">
+                    <li>
+                      <a>Submenu 1</a>
+                    </li>
+                    <li>
+                      <a>Submenu 2</a>
+                    </li>
+                  </ul>
+                </details>
               </li>
               <li>
                 <a>Item 3</a>
               </li>
             </ul>
           </div>
-          <a className="btn btn-ghost text-xl">CurrentBLOCK</a>
-        </div>
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <details>
-                <summary>Parent</summary>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
-              </details>
-            </li>
-            <li>
-              <a>Item 3</a>
-            </li>
-          </ul>
-        </div>
-        <div className="navbar-end">
-          <button className="btn" onClick={connect}>
-            {pkh ? "connected" : "connect"}
-          </button>
+          <div className="navbar-end">
+            <button className="btn" onClick={connect}>
+              {pkh ? "connected" : "connect"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* <button onClick={connect}>connect</button> */}
-      {/* <div className="black-text">{pkh}</div>
-      <hr /> */}
-
-<div className="bg-white max-w-4xl mx-auto my-10">
-      <button
-        onClick={toggleForm}
-        className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-      >
-        {showForm ? 'Hide Form' : 'Create New Post'}
-      </button>
-
-      {showForm && (
-          <form
-          onSubmit={handleSubmit}
-          className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+      <div className="bg-white max-w-4xl mx-auto my-10">
+        <button
+          onClick={toggleForm}
+          className="btn bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         >
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="title"
-            >
-              Title
-            </label>
-            <input
-              className="bg-white shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="title"
-              type="text"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="content"
-            >
-              Content
-            </label>
-            <Editor
-              reload={createdIndexFile}
-              onChange={handleEditorChange}
-              setEditorData={setEditorData}
-              initialData={editorData}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <button
-              className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="submit"
-            >
-              Create Post
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
+          {showForm ? "Hide Form" : "Create New Post"}
+        </button>
 
-
-    
-
- 
+        {showForm && (
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+          >
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="title"
+              >
+                Title
+              </label>
+              <input
+                className="bg-white shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="title"
+                type="text"
+                placeholder="Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="content"
+              >
+                Content
+              </label>
+              <Editor
+                reload={createdIndexFile}
+                onChange={handleEditorChange}
+                setEditorData={setEditorData}
+                initialData={editorData}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <button
+                className="btn bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="submit"
+              >
+                Create Post
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
 
       <div className="flex flex-wrap -mx-2 overflow-hidden">
         {fetchedData &&
@@ -524,7 +568,12 @@ const App = () => {
                   <h2 className="card-title">{item[1]}</h2>
                   <p>{getTextFromEditorData(item[0])}</p>
                   <div className="card-actions justify-end">
-                    <button className="btn btn-primary">Buy Now</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => openCardInNewWindow(item[0], item[1])}
+                    >
+                      Buy Now
+                    </button>
                   </div>
                 </div>
               </div>
